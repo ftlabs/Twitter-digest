@@ -47,6 +47,7 @@ function getTweetsFromFollowing(params, callback) {
 	//TODO: doesn't seem to include "in case you missed it" section
 	client.get('statuses/home_timeline', params, function(err, data){
 		if(err) {
+			console.log(keys);
 			console.log('ERROR', err);
 			callback(plugin);
 			return;
