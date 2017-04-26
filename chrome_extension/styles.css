@@ -1,0 +1,40 @@
+.stream-item.separated-module.digest-stream {
+	background-color: #2f969e;
+}
+.separated-module.digest-stream .recap-header {
+	color: white;
+}
+
+.stream-item.digest-stream-item .content .js-tweet-text {
+	white-space: nowrap;
+  	overflow: hidden;
+ 	text-overflow: ellipsis;
+
+ 	font-style: italic;
+}
+
+.tweet.digest-tweet {
+	min-height: 0;
+	// opacity: .6;
+	color: #5e8487; //#936971;
+}
+
+.tweet.digest-tweet .content {
+	margin-left: 0;
+}
+
+.tweet.digest-tweet .content .digest-source {
+	font-weight: bold;
+	font-style: normal;
+}
+
+.tweet.digest-tweet .content .digest-source:after {
+	content: "\00b7";
+	display: inline-block;
+	padding: 0 5px;
+}
+
+.new-tweets-bar.digest-toggle-tweets {
+	border-radius: 0 0 6px 6px;
+    border-top: none;
+}

@@ -1,0 +1,20 @@
+{
+  "name": "build",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "express": "^4.15.2",
+    "path": "^0.12.7",
+    "twitter": "^1.7.0",
+    "twitter-stream-api": "^0.5.0",
+    "twitter-stream-filters": "^0.1.2"
+  }
+}

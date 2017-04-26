@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+
+  "name": "Twitter filter",
+  "description": "This extension hides tweets containing a specified subject",
+  "version": "1.0",
+  "icons": {
+      "16": "./icons/TD_logo_icon_S.png",
+      "48": "./icons/TD_logo_icon_M.png",
+      "128": "./icons/TD_logo_icon_L.png"
+  },
+  "page_action": {
+    "default_icon": "icons/TD_logo_icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "http://localhost/*"
+  ],
+  "background": {
+    "persistent": false,
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [{
+    "matches": [
+      "*://twitter.com/*"
+    ],
+    "css": [
+      "styles.css"
+    ],
+    "js":[
+      "content_script.js"
+    ],
+    "run_at":"document_start"
+  }]
+}

@@ -1,0 +1,5 @@
+server/node_modules/*
+server/.env
+server/examples/*
+*/.DS_Store
+.DS_Store
