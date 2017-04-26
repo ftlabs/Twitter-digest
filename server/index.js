@@ -25,7 +25,6 @@ var client = new Twitter(keys);
 app.get('/tweets/topic/:topic/:sinceID/:maxID', function(req, res){
 	//TODO: user access token.
 	topic = req.params.topic;
-	console.log(req.params);
 	var query_params = {};
 	if(parseInt(req.params.sinceID) !== 0) {
 		query_params.since_id = parseInt(req.params.sinceID);

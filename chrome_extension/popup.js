@@ -24,6 +24,9 @@ function setFormListener(tabID, enabled) {
         if(topic.value !== '')  {
             let capitalised_topic = topic.value.charAt(0).toUpperCase() + topic.value.slice(1);
             changeTopic(capitalised_topic, tid, toggle, enabled);
+        } else {
+            toggle.checked = false;
+            disableExtension(tid, toggle);
         }
     });
 }

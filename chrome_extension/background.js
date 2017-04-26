@@ -32,14 +32,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
     	chrome.storage.local.remove('tweet_selection');
         chrome.storage.local.remove('digest_topic');
     } else if(message['set_state']) {
-        chrome.storage.local.set({'extension_enabled': message['set_state']});
-        setExtensionIcon(message['tab'], message['set_state']);
-
-        if(message['set_state'] === 'enabled')  pollTweets(message['tab'], 'connect');
+        setState(message['set_state'], message['tab']);
     } else if(message['set_topic']) {
         chrome.storage.local.set({'digest_topic': message['set_topic']});
     }
 });
+
+function setState(state, tab) {
+    chrome.storage.local.set({'extension_enabled': state});
+    setExtensionIcon(tab, state);
+
+    if(state === 'enabled')  pollTweets(tab, 'connect');
+}
 
 function setExtensionIcon(tid, state) {
     let path;
@@ -67,7 +71,11 @@ function pollTweets(tid, action, param) {
               fetchResult = JSON.parse(xmlhttp.responseText);
               chrome.storage.local.get(['tweet_selection'], function(results){
                 if(results.tweet_selection === undefined) {
-                    chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:fetchResult}, function(){}); 
+                    if(fetchResult.tweets.length > 0) {
+                        chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:fetchResult}, function(){}); 
+                    } else {
+                        setState('disabled', tid);
+                    }
                 } else {
                     combineTweets(tid, fetchResult, results.tweet_selection);
                 }
@@ -76,6 +84,8 @@ function pollTweets(tid, action, param) {
                 chrome.storage.local.get(['tweet_selection'], function(results){
                     if(results.tweet_selection !== undefined) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:results.tweet_selection}, function(){}); 
+                    } else {
+                      setState('disabled', tid);   
                     }
                 });
             }
@@ -102,11 +112,7 @@ function getPath(action, tid, tweet_id, callback) {
     chrome.storage.local.get(['digest_topic'], function(results){
         if(results.digest_topic !== undefined) {
                topic = results.digest_topic;
-        } 
-        // else {
-        //     //TODO: handle no topic > disable extension
-        //     // return;
-        // }
+        }
 
         path += '/topic/' + topic;
 
