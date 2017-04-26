@@ -53,8 +53,7 @@ function getTweetsFromFollowing(params, callback) {
 		
 		resetContents();
 		for(var i in data) {
-			//TODO: replace includes by case-insensitive regex?
-			if(data[i].text.includes(topic) || data[i].text.includes(topic.toLowerCase())) {
+			if(data[i].text.toLowerCase().includes(topic.toLowerCase())) {
 				tweets.push(data[i]);
 
 				if(data[i].retweeted_status) {
