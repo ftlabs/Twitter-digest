@@ -1,10 +1,13 @@
 require('dotenv').config();
+const appPort = process.env.PORT || 2017;
 const path = require('path');
 const express = require('express');
+const hmacsha1 = require('hmacsha1');
+
 const app = express();
 
-const Twitter = require('twitter'),
-    fs = require('fs');
+const Twitter = require('twitter');
+const fs = require('fs');
 
 var plugin = {};
 var following = [];
@@ -21,6 +24,8 @@ var keys = {
 };
 
 var client = new Twitter(keys);
+
+app.use('/', require('./oauth.js'));
 
 app.get('/tweets/topic/:topic/:sinceID/:maxID', function(req, res){
 	//TODO: user access token.
@@ -41,7 +46,6 @@ app.get('/tweets/topic/:topic/:sinceID/:maxID', function(req, res){
 		res.json(params);
 	});
 });
-
 
 function getTweetsFromFollowing(params, callback) {
 	//TODO: doesn't seem to include "in case you missed it" section
@@ -85,4 +89,4 @@ function resetContents() {
 	collection = [];
 }
 
-app.listen(2017);
+app.listen(appPort);

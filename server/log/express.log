@@ -1,0 +1,4 @@
+::1 - - [Wed, 26 Apr 2017 13:45:07 GMT] "GET /sessions/connect HTTP/1.1" 500 129 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36"
+::1 - - [Wed, 26 Apr 2017 13:45:07 GMT] "GET /favicon.ico HTTP/1.1" 302 27 "http://localhost:8080/sessions/connect" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36"
+::1 - - [Wed, 26 Apr 2017 13:45:07 GMT] "GET /home HTTP/1.1" 302 39 "http://localhost:8080/sessions/connect" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36"
+::1 - - [Wed, 26 Apr 2017 13:45:07 GMT] "GET /sessions/connect HTTP/1.1" 500 129 "http://localhost:8080/sessions/connect" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36"

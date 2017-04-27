@@ -10,11 +10,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
     "dotenv": "^4.0.0",
     "express": "^4.15.2",
+    "express-logger": "0.0.3",
+    "express-session": "^1.15.2",
+    "hmacsha1": "^1.0.0",
+    "node-fetch": "^1.6.3",
+    "oauth": "^0.9.15",
     "path": "^0.12.7",
     "twitter": "^1.7.0",
     "twitter-stream-api": "^0.5.0",
-    "twitter-stream-filters": "^0.1.2"
+    "twitter-stream-filters": "^0.1.2",
+    "uuid": "^3.0.1"
   }
 }
