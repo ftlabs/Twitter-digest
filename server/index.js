@@ -97,8 +97,12 @@ app.get('/callback', function(req, res){
 	    } else {
 	    	req.session.sessionCookie.access = accessToken;
 		    req.session.sessionCookie.accessKey = accessTokenSecret;
-	    	res.end();
+	    	// res.end();
 	    }
+	});
+
+	res.json( {
+		'callback': 'done'
 	});
 });
 
