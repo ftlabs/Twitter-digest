@@ -5,10 +5,6 @@ window.requestDone = false;
 chrome.runtime.onMessage.addListener(function (message, sender, callback) {
     if (message === 'enable_page_action') {
         let tid = sender.tab.id;
-        // chrome.storage.local.remove('user_logged_in');
-        // chrome.storage.local.remove('tweet_selection');
-        // chrome.storage.local.remove('digest_topic');
-        
         chrome.storage.local.get(['extension_enabled'], function(results){
             if(results.extension_enabled === undefined) {
                 chrome.runtime.sendMessage({'set_state': 'enabled'}, function(){
@@ -60,6 +56,28 @@ function setCredentials(credentials) {
     USER_SECRET = credentials.secret;
 }
 
+function resetUser(tid) {
+    USER_ACCESS = null;
+    USER_SECRET = null;
+    chrome.storage.local.remove('user_logged_in');
+    chrome.storage.local.remove('tweet_selection');
+    chrome.storage.local.remove('digest_topic');
+
+    setState('disabled', tid);
+
+    var views = chrome.extension.getViews({
+        type: "popup"
+    });
+    
+    views.forEach(function(view){
+        var signup = view.document.getElementById('signup');
+        signup.classList.remove('hidden');
+
+        var form = view.document.getElementById('userSettings');
+        form.classList.add('hidden');
+    });
+}
+
 function setState(state, tab) {
     chrome.storage.local.set({'extension_enabled': state});
     setExtensionIcon(tab, state);
@@ -91,6 +109,11 @@ function pollTweets(tid, action, param) {
         if (xmlhttp.readyState == 4) {
             if(xmlhttp.status == 200) {
               fetchResult = JSON.parse(xmlhttp.responseText);
+              if(fetchResult.error) {
+                resetUser(tid);
+                return;
+              }
+
               chrome.storage.local.get(['tweet_selection'], function(results){
                 if(results.tweet_selection === undefined) {
                     if(fetchResult.tweets.length > 0) {

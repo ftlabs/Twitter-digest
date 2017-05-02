@@ -4,18 +4,17 @@ const express = require('express');
 const app = express();
 const https = require('https');
 const session = require('express-session');
+const appPort = process.env.PORT || 2017;
+const fs = require('fs');
 
 const Twitter = require('twitter'),
 twitterAPI = require('node-twitter-api');
-
-const fs = require('fs');
 
 var plugin = {};
 var following = [];
 var tweets = [];
 var collection = [];
-
-var topic = 'Trump';
+var topic = '';
  
 var keys = {
     consumer_key : process.env.CONSUMER_KEY,
@@ -27,7 +26,7 @@ var keys = {
 let twitterLogin = new twitterAPI({
 	consumerKey: keys.consumer_key,
 	consumerSecret: keys.consumer_secret,
-	callback: "http://localhost:2017/callback"
+	callback: process.env.CALLBACK_URL
 });
 
 app.use(session({
@@ -100,18 +99,30 @@ app.get('/credentials/:token', function(req, res){
 
 function getTweetsFromFollowing(params, callback) {
 	var client = new Twitter(keys);
-
-	//TODO: doesn't seem to include "in case you missed it" section
 	client.get('statuses/home_timeline', params, function(err, data){
 		if(err) {
-			console.log('ERROR', err);
-			callback(plugin);
+			var errorID;
+			var error = err.find((i) => {
+				if(i.code === 89) {
+					errorID = i.message;
+	            	return true;
+				}
+
+				return false;
+	        });
+
+			if(error) {
+				callback({'error': errorID});
+	        } else {
+				callback(plugin);
+			}
 			return;
 		}
 		
 		resetContents();
 		for(var i in data) {
 			//TODO: replace includes by case-insensitive regex?
+			//TODO: doesn't seem to include "in case you missed it" section
 			if(data[i].text.includes(topic) || data[i].text.includes(topic.toLowerCase())) {
 				tweets.push(data[i]);
 
@@ -142,4 +153,4 @@ function resetContents() {
 	collection = [];
 }
 
-app.listen(2017); //TODO: adjust for Heroku
+app.listen(appPort);

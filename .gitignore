@@ -3,3 +3,4 @@ server/.env
 server/examples/*
 assets/*
 */.DS_Store
+.DS_Store
