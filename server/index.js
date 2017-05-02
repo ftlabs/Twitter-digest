@@ -108,10 +108,10 @@ app.get('/credentials/:token', function(req, res){
 			'secret': req.session.sessionCookie.accessKey
 		});
 	} else {
-		res.json({
-			'cookie': JSON.stringify(req.session.sessionCookie)
-		})
-		// res.status(204).send('Creds not ready');
+		// res.json({
+		// 	'cookie': JSON.stringify(req.session.sessionCookie)
+		// })
+		res.status(204).send(JSON.stringify(req.session.sessionCookie));
 	}
 });
 
