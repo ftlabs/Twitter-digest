@@ -82,7 +82,8 @@ app.get('/login', function(req, res){
 		  	}
 
 	        res.json({
-	        	token: requestToken
+	        	token: requestToken,
+	        	cookie: JSON.stringify(req.session.sessionCookie)
 	        });
 	    }
 	});
@@ -104,7 +105,8 @@ app.get('/credentials/:token', function(req, res){
 	if(req.session.sessionCookie.token === req.params.token && !!req.session.sessionCookie.access) {
 		res.json({
 			'access': req.session.sessionCookie.access,
-			'secret': req.session.sessionCookie.accessKey
+			'secret': req.session.sessionCookie.accessKey,
+			'cookie': JSON.stringify(req.session.sessionCookie)
 		});
 	} else {
 		res.status(204).send('Creds not ready');

@@ -11,6 +11,8 @@ function signInRequest(callback) {
 	        authLink.setAttribute('target', '_blank');
 	        document.body.appendChild(authLink);
 
+	        console.log('cookie login:', JSON.parse(http.responseText).cookie);
+
 	        authLink.click();
 	        getCreds(token, callback);
 
@@ -33,7 +35,8 @@ function getCreds(token, callback) {
 	http.onreadystatechange = function() {
 	    if(http.readyState == 4 && http.status == 200) {
 	        let result = JSON.parse(http.responseText);
-	        console.log(result);
+	        // console.log(result);
+	        console.log('cookie login:', JSON.parse(http.responseText).cookie);
 
 	        chrome.storage.local.set({'user_logged_in': JSON.stringify({
 		        	'token': result.access,
@@ -44,7 +47,7 @@ function getCreds(token, callback) {
 		    	callback(result);
 		    });
 	    } else if(http.readyState == 4 && http.status === 204) {
-	    	getCreds(token, callback);
+	    	// getCreds(token, callback);
 	    }
 	}
 
