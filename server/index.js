@@ -10,6 +10,20 @@ const fs = require('fs');
 const Twitter = require('twitter'),
 twitterAPI = require('node-twitter-api');
 
+const allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'chrome-extension://*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+      res.send(200);
+    }
+    else {
+      next();
+    }
+}
+
 var plugin = {};
 var following = [];
 var tweets = [];
@@ -29,6 +43,7 @@ let twitterLogin = new twitterAPI({
 	callback: process.env.CALLBACK_URL
 });
 
+app.use(allowCrossDomain);
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,

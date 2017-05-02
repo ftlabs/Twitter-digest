@@ -1,6 +1,6 @@
 function signInRequest(callback) {
 	let http = new XMLHttpRequest();
-	let path = "http://localhost:2017/login"
+	let path = "https://ftlabs-twitter-digest.herokuapp.com/login"
 
 	http.onreadystatechange = function() {
 	    if(http.readyState == 4 && http.status == 200) {
@@ -27,7 +27,7 @@ function signInRequest(callback) {
 
 function getCreds(token, callback) {
 	let http = new XMLHttpRequest();
-	let path = "http://localhost:2017/credentials/" + token;
+	let path = "https://ftlabs-twitter-digest.herokuapp.com/credentials/" + token;
 
 	http.onreadystatechange = function() {
 	    if(http.readyState == 4 && http.status == 200) {
