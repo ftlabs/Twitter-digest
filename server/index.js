@@ -105,11 +105,13 @@ app.get('/credentials/:token', function(req, res){
 	if(req.session.sessionCookie.token === req.params.token && !!req.session.sessionCookie.access) {
 		res.json({
 			'access': req.session.sessionCookie.access,
-			'secret': req.session.sessionCookie.accessKey,
-			'cookie': JSON.stringify(req.session.sessionCookie)
+			'secret': req.session.sessionCookie.accessKey
 		});
 	} else {
-		res.status(204).send('Creds not ready');
+		res.json({
+			'cookie': JSON.stringify(req.session.sessionCookie)
+		})
+		// res.status(204).send('Creds not ready');
 	}
 });
 

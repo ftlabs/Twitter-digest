@@ -36,7 +36,7 @@ function getCreds(token, callback) {
 	    if(http.readyState == 4 && http.status == 200) {
 	        let result = JSON.parse(http.responseText);
 	        // console.log(result);
-	        console.log('cookie login:', JSON.parse(http.responseText).cookie);
+	        console.log('cookie creds:', JSON.parse(http.responseText).cookie);
 
 	        chrome.storage.local.set({'user_logged_in': JSON.stringify({
 		        	'token': result.access,
