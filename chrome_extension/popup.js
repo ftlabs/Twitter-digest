@@ -65,10 +65,16 @@ function changeTopic(topic, tid, toggle, enabled) {
             });
         });
     }
-};
+}
 
-let port = chrome.extension.connect();
-port.onMessage.addListener(function(tabID) {
+function setExtensionContent(tabID) {
+    let signup = document.getElementById('signup');
+    signup.classList.add('hidden');
+
+    let form = document.getElementById('userSettings');
+    form.classList.remove('hidden');
+
+
     let active;
     chrome.storage.local.get(['extension_enabled'], function(results){
         if(results.extension_enabled === 'disabled') {
@@ -84,5 +90,25 @@ port.onMessage.addListener(function(tabID) {
 
             setFormListener(tabID, active);
         });
+    });
+}
+
+function setLoginListener(tid) {
+    let signup = document.getElementById('signup');
+
+    signup.addEventListener('click', function(e){
+        chrome.runtime.sendMessage({'request_login': true, 'tab': tid}, function(){});
+    });
+}
+
+let port = chrome.extension.connect();
+port.onMessage.addListener(function(tabID) {
+    chrome.storage.local.get(['user_logged_in'], function(results){
+        console.log('login results', results);
+        if(results.user_logged_in !== undefined) {
+            setExtensionContent(tabID);
+        } else {
+            setLoginListener(tabID);
+        }
     });
 });

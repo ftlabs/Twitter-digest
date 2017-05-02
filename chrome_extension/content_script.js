@@ -53,6 +53,8 @@ chrome.runtime.onMessage.addListener((message) => {
 			newTweetsObserver.disconnect();
 		if(filter)	showOriginalTweets(filter);
 		chrome.runtime.sendMessage('delete_cookie', function(){});
+	} else if(message.message === 'reloadWindow') {
+		location.reload();
 	}
 });
 
