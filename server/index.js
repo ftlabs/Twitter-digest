@@ -10,20 +10,6 @@ const fs = require('fs');
 const Twitter = require('twitter'),
 twitterAPI = require('node-twitter-api');
 
-// const allowCrossDomain = function(req, res, next) {
-//     res.header('Access-Control-Allow-Origin', 'chrome-extension://*');
-//     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-//     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-
-//     // intercept OPTIONS method
-//     if ('OPTIONS' == req.method) {
-//       res.send(200);
-//     }
-//     else {
-//       next();
-//     }
-// }
-
 var plugin = {};
 var following = [];
 var tweets = [];
@@ -43,7 +29,6 @@ let twitterLogin = new twitterAPI({
 	callback: process.env.CALLBACK_URL
 });
 
-// app.use(allowCrossDomain);
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
@@ -82,9 +67,7 @@ app.get('/login', function(req, res){
 		  	}
 
 	        res.json({
-	        	token: requestToken,
-	        	cookie: JSON.stringify(req.session.sessionCookie),
-	        	callback: process.env.CALLBACK_URL
+	        	token: requestToken
 	        });
 	    }
 	});
@@ -94,17 +77,10 @@ app.get('/callback', function(req, res){
 	twitterLogin.getAccessToken(req.session.sessionCookie.token, req.session.sessionCookie.secret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
 	    if (error) {
 	        console.log(error);
-	        	res.json( {
-					'callback': JSON.stringify(req.session.sessionCookie),
-					'error': error
-				});
 	    } else {
 	    	req.session.sessionCookie.access = accessToken;
 		    req.session.sessionCookie.accessKey = accessTokenSecret;
-	    	res.json({
-	    		'access': 'granted',
-	    		'cookie': JSON.stringify(req.session.sessionCookie)
-	    	});
+	    	res.end();
 	    }
 	});
 });
@@ -116,10 +92,7 @@ app.get('/credentials/:token', function(req, res){
 			'secret': req.session.sessionCookie.accessKey
 		});
 	} else {
-		// res.json({
-		// 	'cookie': JSON.stringify(req.session.sessionCookie)
-		// })
-		res.status(204).send(JSON.stringify(req.session.sessionCookie));
+		res.status(204).send('Creds not ready');
 	}
 });
 

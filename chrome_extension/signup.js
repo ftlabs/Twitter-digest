@@ -3,16 +3,12 @@ function signInRequest(callback) {
 	let path = "https://ftlabs-twitter-digest.herokuapp.com/login"
 
 	http.onreadystatechange = function() {
-		console.log(http);
 	    if(http.readyState == 4 && http.status == 200) {
 	        let token = JSON.parse(http.responseText).token;
 	        let authLink = document.createElement('a');
 	        authLink.setAttribute('href', 'https://twitter.com/oauth/authenticate?oauth_token=' + token);
 	        authLink.setAttribute('target', '_blank');
 	        document.body.appendChild(authLink);
-
-	        console.log('cookie login:', JSON.parse(http.responseText).cookie);
-	        console.log('login callback:', JSON.parse(http.responseText).callback);
 
 	        authLink.click();
 	        getCreds(token, callback);
@@ -36,8 +32,6 @@ function getCreds(token, callback) {
 	http.onreadystatechange = function() {
 	    if(http.readyState == 4 && http.status == 200) {
 	        let result = JSON.parse(http.responseText);
-	        // console.log(result);
-	        console.log('cookie creds:', JSON.parse(http.responseText).cookie);
 
 	        chrome.storage.local.set({'user_logged_in': JSON.stringify({
 		        	'token': result.access,
@@ -48,7 +42,6 @@ function getCreds(token, callback) {
 		    	callback(result);
 		    });
 	    } else if(http.readyState == 4 && http.status === 204) {
-	    	console.log(http);
 	    	getCreds(token, callback);
 	    }
 	}
