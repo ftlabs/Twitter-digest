@@ -103,7 +103,7 @@ app.get('/callback', function(req, res){
 		    req.session.sessionCookie.accessKey = accessTokenSecret;
 	    	res.json({
 	    		'access': 'granted',
-	    		'cookie': JSON.stringify(req.session.sessionCookie);
+	    		'cookie': JSON.stringify(req.session.sessionCookie)
 	    	});
 	    }
 	});
