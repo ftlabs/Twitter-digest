@@ -94,15 +94,17 @@ app.get('/callback', function(req, res){
 	twitterLogin.getAccessToken(req.session.sessionCookie.token, req.session.sessionCookie.secret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
 	    if (error) {
 	        console.log(error);
+	        	res.json( {
+					'callback': JSON.stringify(req.session.sessionCookie),
+					'error': error
+				});
 	    } else {
 	    	req.session.sessionCookie.access = accessToken;
 		    req.session.sessionCookie.accessKey = accessTokenSecret;
-	    	// res.end();
+	    	res.json({
+	    		'access': 'granted'
+	    	});
 	    }
-	});
-
-	res.json( {
-		'callback': 'done'
 	});
 });
 
