@@ -151,7 +151,7 @@ function pollTweets(tid, action, param) {
 }
 
 function getPath(action, tid, tweet_id, callback) {
-    let path = "http://localhost:2017/tweets/user/"+USER_SECRET+"/"+USER_ACCESS;
+    let path = "https://ftlabs-twitter-digest.herokuapp.com/tweets/user/"+USER_SECRET+"/"+USER_ACCESS;
     let topic, sinceID, maxID;
 
     chrome.storage.local.get(['digest_topic'], function(results){
