@@ -49,7 +49,7 @@ function getCreds(token, callback) {
 		    });
 	    } else if(http.readyState == 4 && http.status === 204) {
 	    	console.log(http);
-	    	// getCreds(token, callback);
+	    	getCreds(token, callback);
 	    }
 	}
 
