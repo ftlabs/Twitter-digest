@@ -16,7 +16,8 @@
   "permissions": [
     "activeTab",
     "storage",
-    "http://localhost/*"
+    "http://localhost/*",
+    "https://ftlabs-twitter-digest.herokuapp.com/*"
   ],
   "background": {
     "persistent": false,
