@@ -18,7 +18,7 @@ It is currently on Heroku.
 
 ### The joys of OAuth
 To handle user authentication to the `Feed Summary` Twitter app, this project uses OAuth and the `node-twitter-api` module.
-Please beware: You need to pass a callback url when initiating the module, and it needs to match the URL you have set up in the `Feed Summary` app. See [developers.twitter.com](http://developers.twitter.com) to change the settings.
+Please beware: You need to pass a callback url when initiating the module, and it needs to match the URL you have set up in the `Feed Summary` app. See [developer.twitter.com](http://developer.twitter.com) to change the settings.
 
 ### Chrome extension tips
 To avoid CORS issues, ensure you have granted access to all relevant domains in the extension's `manifest.json`.
