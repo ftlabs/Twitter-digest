@@ -83,7 +83,8 @@ app.get('/login', function(req, res){
 
 	        res.json({
 	        	token: requestToken,
-	        	cookie: JSON.stringify(req.session.sessionCookie)
+	        	cookie: JSON.stringify(req.session.sessionCookie),
+	        	callback: process.env.CALLBACK_URL
 	        });
 	    }
 	});

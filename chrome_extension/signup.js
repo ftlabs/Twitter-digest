@@ -12,6 +12,7 @@ function signInRequest(callback) {
 	        document.body.appendChild(authLink);
 
 	        console.log('cookie login:', JSON.parse(http.responseText).cookie);
+	        console.log('login callback:', JSON.parse(http.responseText).callback);
 
 	        authLink.click();
 	        getCreds(token, callback);
@@ -47,8 +48,8 @@ function getCreds(token, callback) {
 		    	callback(result);
 		    });
 	    } else if(http.readyState == 4 && http.status === 204) {
-	    	console.log(JSON.parse(http.responseText).cookie);
-	    	getCreds(token, callback);
+	    	console.log(http);
+	    	// getCreds(token, callback);
 	    }
 	}
 
