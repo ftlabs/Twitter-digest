@@ -53,9 +53,10 @@ function disableExtension(tid, toggle) {
 
 function changeTopic(topic, tid, toggle, enabled) {
     toggle.disabled = false;
+
     if(topic !== currentTopic) {
+        currentTopic = topic;
         chrome.tabs.sendMessage(tid, {message:'resetfilter'}, function(){
-            currentTopic = topic;
             chrome.runtime.sendMessage({'set_topic': topic, 'tab': tid}, function(){
                 if (!enabled) {
                     toggle.click();
@@ -104,7 +105,6 @@ function setLoginListener(tid) {
 let port = chrome.extension.connect();
 port.onMessage.addListener(function(tabID) {
     chrome.storage.local.get(['user_logged_in'], function(results){
-        console.log('login results', results);
         if(results.user_logged_in !== undefined) {
             setExtensionContent(tabID);
         } else {

@@ -55,6 +55,8 @@ chrome.runtime.onMessage.addListener((message) => {
 		chrome.runtime.sendMessage('delete_cookie', function(){});
 	} else if(message.message === 'reloadWindow') {
 		location.reload();
+	} else if(message.message === 'topicNoResults') {
+		chrome.runtime.sendMessage({'set_cookie': message.filter}, function(){});
 	}
 });
 
