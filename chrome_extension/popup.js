@@ -1,33 +1,38 @@
 let currentTopic = null;
 
-function setFormListener(tabID, enabled) {
+function setFormListener(enabled) {
     let form = document.getElementById('userSettings');
     let toggle = form.querySelector('.switch input');
     let topic = form.querySelector('#keyword');
-    let tid = tabID;
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          let currTab = tabs[0];
+          let tid = currTab.id;
 
-    toggle.checked = enabled;
-    toggle.disabled = !enabled;
-    topic.value = currentTopic;
+          if (currTab) { // Sanity check
+            toggle.checked = enabled;
+            toggle.disabled = !enabled;
+            topic.value = currentTopic;
 
-    toggle.addEventListener('click', function(e){
-        e.stopPropagation();
-        if(e.currentTarget.checked) {
-            enableExtension(tid, toggle);
-        } else {
-            disableExtension(tid, toggle);
-        }
-    });
+            toggle.addEventListener('click', function(e){
+                e.stopPropagation();
+                if(e.currentTarget.checked) {
+                    enableExtension(tid, toggle);
+                } else {
+                    disableExtension(tid, toggle);
+                }
+            });
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if(topic.value !== '')  {
-            let capitalised_topic = topic.value.charAt(0).toUpperCase() + topic.value.slice(1);
-            changeTopic(capitalised_topic, tid, toggle, enabled);
-        } else {
-            toggle.checked = false;
-            disableExtension(tid, toggle);
-        }
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if(topic.value !== '')  {
+                    let capitalised_topic = topic.value.charAt(0).toUpperCase() + topic.value.slice(1);
+                    changeTopic(capitalised_topic, tid, toggle, enabled);
+                } else {
+                    toggle.checked = false;
+                    disableExtension(tid, toggle);
+                }
+            });
+          }
     });
 }
 
@@ -36,7 +41,7 @@ function enableExtension(tid, toggle) {
     chrome.runtime.sendMessage({'set_state': 'enabled', 'tab': tid}, function(){
         setTimeout(() => {
             window.close();
-        }, 400);
+        }, 500);
     });
 }
 
@@ -46,7 +51,7 @@ function disableExtension(tid, toggle) {
         chrome.runtime.sendMessage({'set_state': 'disabled', 'tab': tid}, function(){
             setTimeout(() => {
                 window.close();
-            }, 400);
+            }, 500);
         });
     });
 }
@@ -57,7 +62,7 @@ function changeTopic(topic, tid, toggle, enabled) {
     if(topic !== currentTopic) {
         currentTopic = topic;
         chrome.tabs.sendMessage(tid, {message:'resetfilter'}, function(){
-            chrome.runtime.sendMessage({'set_topic': topic, 'tab': tid}, function(){
+            chrome.runtime.sendMessage({'set_topic': currentTopic, 'tab': tid}, function(){
                 if (!enabled) {
                     toggle.click();
                 } else {
@@ -89,7 +94,7 @@ function setExtensionContent(tabID) {
                 currentTopic = results.tweet_selection.topic;
             }
 
-            setFormListener(tabID, active);
+            setFormListener(active);
         });
     });
 }

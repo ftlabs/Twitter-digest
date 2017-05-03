@@ -13,25 +13,25 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
             } else {
                 resetUser(tid);
             }
-        });
 
-        chrome.storage.local.get(['extension_enabled'], function(results){
-            if(results.extension_enabled === undefined) {
-                chrome.runtime.sendMessage({'set_state': 'enabled'}, function(){
+            chrome.storage.local.get(['extension_enabled'], function(results){
+                if(results.extension_enabled === undefined) {
+                    chrome.runtime.sendMessage({'set_state': 'enabled'}, function(){
+                        pollTweets(tid, 'connect');
+                    });
+                } else if(results.extension_enabled === 'enabled') {
                     pollTweets(tid, 'connect');
-                });
-            } else if(results.extension_enabled === 'enabled') {
-                pollTweets(tid, 'connect');
-            }
+                }
 
-            setExtensionIcon(tid, results.extension_enabled);
-        });
+                setExtensionIcon(tid, results.extension_enabled);
+            });
 
-        chrome.extension.onConnect.addListener(function(port) {
-           port.postMessage(tid);
+            chrome.extension.onConnect.addListener(function(port) {
+               port.postMessage(tid);
+            });
+            
+            chrome.pageAction.show(tid);
         });
-        
-        chrome.pageAction.show(tid);
 
     } else if(message['load_old_tweets']){
         pollTweets(sender.tab.id, 'load_old', message['load_old_tweets']);
@@ -169,7 +169,7 @@ function getPath(action, tid, tweet_id, callback) {
 
     chrome.storage.local.get(['digest_topic'], function(results){
         if(results.digest_topic !== undefined) {
-               topic = results.digest_topic;
+            topic = results.digest_topic;
         } else {
             topic = saved_topic;
         }
