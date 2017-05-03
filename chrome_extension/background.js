@@ -1,10 +1,20 @@
 let lastCall = 0;
 let USER_ACCESS, USER_SECRET;
+let saved_topic;
 window.requestDone = false;
 
 chrome.runtime.onMessage.addListener(function (message, sender, callback) {
-    if (message === 'enable_page_action') {
+    if (message === 'enable_page_action' && sender.tab.active) {
         let tid = sender.tab.id;
+
+        chrome.storage.local.get(['user_logged_in'], function(results) {
+            if(results.user_logged_in !== undefined) {
+                setCredentials(JSON.parse(results.user_logged_in));
+            } else {
+                resetUser(tid);
+            }
+        });
+
         chrome.storage.local.get(['extension_enabled'], function(results){
             if(results.extension_enabled === undefined) {
                 chrome.runtime.sendMessage({'set_state': 'enabled'}, function(){
@@ -15,12 +25,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
             }
 
             setExtensionIcon(tid, results.extension_enabled);
-        });
-
-        chrome.storage.local.get(['user_logged_in'], function(results) {
-            if(results.user_logged_in !== undefined) {
-                setCredentials(JSON.parse(results.user_logged_in));
-            }
         });
 
         chrome.extension.onConnect.addListener(function(port) {
@@ -38,9 +42,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
     } else if(message === 'delete_cookie') {
     	chrome.storage.local.remove('tweet_selection');
         chrome.storage.local.remove('digest_topic');
+        saved_topic = '';
     } else if(message['set_state']) {
         setState(message['set_state'], message['tab']);
     } else if(message['set_topic']) {
+        saved_topic = message['set_topic'];
         chrome.storage.local.set({'digest_topic': message['set_topic']});
     } else if(message['request_login']) {
         signInRequest(function(credentials) {
@@ -62,6 +68,7 @@ function resetUser(tid) {
     chrome.storage.local.remove('user_logged_in');
     chrome.storage.local.remove('tweet_selection');
     chrome.storage.local.remove('digest_topic');
+    saved_topic = '';
 
     setState('disabled', tid);
 
@@ -109,6 +116,7 @@ function pollTweets(tid, action, param) {
         if (xmlhttp.readyState == 4) {
             if(xmlhttp.status == 200) {
               fetchResult = JSON.parse(xmlhttp.responseText);
+
               if(fetchResult.error) {
                 resetUser(tid);
                 return;
@@ -119,7 +127,7 @@ function pollTweets(tid, action, param) {
                     if(fetchResult.tweets.length > 0) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:fetchResult}, function(){}); 
                     } else {
-                        setState('disabled', tid);
+                        chrome.tabs.sendMessage(tid, {message:'topicNoResults', result: fetchResult}, function(){});
                     }
                 } else {
                     combineTweets(tid, fetchResult, results.tweet_selection);
@@ -130,7 +138,12 @@ function pollTweets(tid, action, param) {
                     if(results.tweet_selection !== undefined) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:results.tweet_selection}, function(){}); 
                     } else {
-                      setState('disabled', tid);   
+                        var empty_results = {
+                            topic: saved_topic,
+                            collection: [],
+                            tweets: []
+                        }
+                        chrome.tabs.sendMessage(tid, {message:'topicNoResults', filter: empty_results}, function(){});
                     }
                 });
             }
@@ -157,6 +170,8 @@ function getPath(action, tid, tweet_id, callback) {
     chrome.storage.local.get(['digest_topic'], function(results){
         if(results.digest_topic !== undefined) {
                topic = results.digest_topic;
+        } else {
+            topic = saved_topic;
         }
 
         path += '/topic/' + topic;
