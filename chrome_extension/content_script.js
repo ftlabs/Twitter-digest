@@ -16,14 +16,16 @@ chrome.runtime.onMessage.addListener((message) => {
 		if(stream.querySelector('.digest-stream') !== null) stream.querySelector('.digest-stream').remove();
 
 		for(let i = 0; i < filter.tweets.length; ++i) {
-			let tweet = document.querySelector('.stream-item[data-item-id="'+filter.tweets[i].id_str+'"]');
-			if(tweet !== null) {
-				tweet.classList.add('hidden');
-				filter.tweets[i].digestScore = getDigestScore(tweet);
-				filter.tweets[i].hidden = false;
-			}
-			else {
-				filter.tweets[i].hidden = true;
+			if(filter.tweets[i] !== null) {	
+				let tweet = document.querySelector('.stream-item[data-item-id="'+filter.tweets[i].id_str+'"]');
+				if(tweet !== null) {
+					tweet.classList.add('hidden');
+					filter.tweets[i].digestScore = getDigestScore(tweet);
+					filter.tweets[i].hidden = false;
+				}
+				else {
+					filter.tweets[i].hidden = true;
+				}
 			}
 		}
 
