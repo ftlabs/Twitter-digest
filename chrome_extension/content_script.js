@@ -15,9 +15,9 @@ chrome.runtime.onMessage.addListener((message) => {
 		let stream = document.querySelector('.stream-container >.stream >ol.stream-items');
 		if(stream.querySelector('.digest-stream') !== null) stream.querySelector('.digest-stream').remove();
 
-		for(let i in filter.collection) {
-			let tweet = document.querySelector('.stream-item[data-item-id="'+filter.collection[i]+'"]');
-			if(tweet !== null && filter.tweets[i] !== null) {
+		for(let i = 0; i < filter.tweets.length; ++i) {
+			let tweet = document.querySelector('.stream-item[data-item-id="'+filter.tweets[i].id_str+'"]');
+			if(tweet !== null) {
 				tweet.classList.add('hidden');
 				filter.tweets[i].digestScore = getDigestScore(tweet);
 				filter.tweets[i].hidden = false;
