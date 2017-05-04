@@ -127,7 +127,6 @@ function pollTweets(tid, action, param) {
               }
 
               chrome.storage.local.get(['tweet_selection'], function(results){
-                console.log('polltweets', results);
                 if(results.tweet_selection === undefined) {
                     if(fetchResult.tweets.length > 0) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:fetchResult}, function(){}); 
@@ -140,7 +139,6 @@ function pollTweets(tid, action, param) {
               });
             } else {
                 chrome.storage.local.get(['tweet_selection'], function(results){
-                    console.log('polltweets', results);
                     if(results.tweet_selection !== undefined) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:results.tweet_selection}, function(){}); 
                     } else {
