@@ -248,7 +248,8 @@ function updateMaxID() {
 }
 
 function toggleExtension() {
-	chrome.runtime.sendMessage('enable_page_action', function () {});
+	var userID = JSON.parse(document.getElementById('init-data').value).userId;
+	chrome.runtime.sendMessage({'enable_page_action': userID}, function () {});
 }
 
 document.addEventListener('DOMContentLoaded', toggleExtension);

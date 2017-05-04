@@ -1,4 +1,4 @@
-function signInRequest(callback) {
+function signInRequest(user, callback) {
 	let http = new XMLHttpRequest();
 	let path = "https://ftlabs-twitter-digest.herokuapp.com/login"
 
@@ -11,7 +11,7 @@ function signInRequest(callback) {
 	        document.body.appendChild(authLink);
 
 	        authLink.click();
-	        getCreds(token, callback);
+	        getCreds(user, token, callback);
 
 	        //In case the callback isn't fired and users need to be able to sign in again
 			window.requestDone = false;
@@ -25,7 +25,7 @@ function signInRequest(callback) {
 	}
 }
 
-function getCreds(token, callback) {
+function getCreds(user, token, callback) {
 	let http = new XMLHttpRequest();
 	let path = "https://ftlabs-twitter-digest.herokuapp.com/credentials/" + token;
 
@@ -33,16 +33,18 @@ function getCreds(token, callback) {
 	    if(http.readyState == 4 && http.status == 200) {
 	        let result = JSON.parse(http.responseText);
 
-	        chrome.storage.local.set({'user_logged_in': JSON.stringify({
-		        	'token': result.access,
-		        	'secret': result.secret
-		        })
-		    }, function(){
+	        var cookie = {};
+	        cookie[user] = JSON.stringify({
+	        	'token': result.access,
+	        	'secret': result.secret
+	        });
+
+	        chrome.storage.local.set(cookie, function(){
 		    	result.token = result.access;
 		    	callback(result);
 		    });
 	    } else if(http.readyState == 4 && http.status === 204) {
-	    	getCreds(token, callback);
+	    	getCreds(user, token, callback);
 	    }
 	}
 

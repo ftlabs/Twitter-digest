@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
 
-  "name": "Twitter filter",
-  "description": "This extension hides tweets containing a specified subject",
+  "name": "Twitter Digest",
+  "description": "This extension groups tweets containing a specified topic",
   "version": "1.0",
   "icons": {
       "16": "./icons/TD_logo_icon_S.png",
