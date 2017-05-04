@@ -20,12 +20,14 @@ chrome.runtime.onMessage.addListener((message) => {
 				let tweet = document.querySelector('.stream-item[data-item-id="'+filter.tweets[i].id_str+'"]');
 				if(tweet !== null) {
 					tweet.classList.add('hidden');
-					filter.tweets[i].digestScore = getDigestScore(tweet);
+					if(!filter.tweets[i].digestScore) filter.tweets[i].digestScore = getDigestScore(tweet);
 					filter.tweets[i].hidden = false;
 				}
 				else {
 					filter.tweets[i].hidden = true;
 				}
+			} else {
+				filter.tweets.splice(i, 1);
 			}
 		}
 
