@@ -123,7 +123,7 @@ function getTweetsFromFollowing(params, callback) {
 		for(var i in data) {
 			//TODO: replace includes by case-insensitive regex?
 			//TODO: doesn't seem to include "in case you missed it" section
-			if(data[i].text.includes(topic) || data[i].text.includes(topic.toLowerCase())) {
+			if(data[i].text.toLowerCase().includes(topic.toLowerCase())) {
 				tweets.push(data[i]);
 
 				if(data[i].retweeted_status) {
