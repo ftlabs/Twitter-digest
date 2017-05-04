@@ -1,15 +1,17 @@
 let lastCall = 0;
-let USER_ACCESS, USER_SECRET;
+let USER_ACCESS, USER_SECRET, currentUser;
 let saved_topic;
 window.requestDone = false;
 
 chrome.runtime.onMessage.addListener(function (message, sender, callback) {
-    if (message === 'enable_page_action' && sender.tab.active) {
+    if (message['enable_page_action'] && sender.tab.active) {
         let tid = sender.tab.id;
 
-        chrome.storage.local.get(['user_logged_in'], function(results) {
-            if(results.user_logged_in !== undefined) {
-                setCredentials(JSON.parse(results.user_logged_in));
+        currentUser = message['enable_page_action'];
+
+        chrome.storage.local.get(currentUser, function(results) {
+            if(results[currentUser] !== undefined) {
+                setCredentials(JSON.parse(results[currentUser]));
             } else {
                 resetUser(tid);
             }
@@ -27,7 +29,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
             });
 
             chrome.extension.onConnect.addListener(function(port) {
-               port.postMessage(tid);
+               port.postMessage({'user': currentUser, 'tab': tid});
             });
             
             chrome.pageAction.show(tid);
@@ -38,7 +40,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
     } else if(message['load_new_tweets']) {
         pollTweets(sender.tab.id, 'load_new', message['load_new_tweets']);
     } else if(message['set_cookie']) {
-    	chrome.storage.local.set({'tweet_selection': message['set_cookie']});
+        var selection = message['set_cookie'];
+        if(!selection.user) selection.user = currentUser;
+    	chrome.storage.local.set({'tweet_selection': selection});
     } else if(message === 'delete_cookie') {
     	chrome.storage.local.remove('tweet_selection');
         chrome.storage.local.remove('digest_topic');
@@ -49,7 +53,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, callback) {
         saved_topic = message['set_topic'];
         chrome.storage.local.set({'digest_topic': message['set_topic']});
     } else if(message['request_login']) {
-        signInRequest(function(credentials) {
+        signInRequest(currentUser, function(credentials) {
             setCredentials(credentials);
             chrome.tabs.update(message['tab'], {selected: true});
             chrome.tabs.sendMessage(message['tab'], {message:'reloadWindow'}, function(){});
@@ -65,7 +69,7 @@ function setCredentials(credentials) {
 function resetUser(tid) {
     USER_ACCESS = null;
     USER_SECRET = null;
-    chrome.storage.local.remove('user_logged_in');
+    chrome.storage.local.remove(currentUser);
     chrome.storage.local.remove('tweet_selection');
     chrome.storage.local.remove('digest_topic');
     saved_topic = '';
@@ -123,6 +127,7 @@ function pollTweets(tid, action, param) {
               }
 
               chrome.storage.local.get(['tweet_selection'], function(results){
+                console.log('polltweets', results);
                 if(results.tweet_selection === undefined) {
                     if(fetchResult.tweets.length > 0) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:fetchResult}, function(){}); 
@@ -135,6 +140,7 @@ function pollTweets(tid, action, param) {
               });
             } else {
                 chrome.storage.local.get(['tweet_selection'], function(results){
+                    console.log('polltweets', results);
                     if(results.tweet_selection !== undefined) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:results.tweet_selection}, function(){}); 
                     } else {

@@ -73,7 +73,7 @@ function changeTopic(topic, tid, toggle, enabled) {
     }
 }
 
-function setExtensionContent(tabID) {
+function setExtensionContent(tabID, user) {
     let signup = document.getElementById('signup');
     signup.classList.add('hidden');
 
@@ -90,8 +90,11 @@ function setExtensionContent(tabID) {
         }
 
         chrome.storage.local.get(['tweet_selection'], function(results){
+            console.log('getTweets', results);
             if(results.tweet_selection !== undefined) {
-                currentTopic = results.tweet_selection.topic;
+                if(results.tweet_selection.user === user) {
+                    currentTopic = results.tweet_selection.topic;
+                }
             }
 
             setFormListener(active);
@@ -108,12 +111,14 @@ function setLoginListener(tid) {
 }
 
 let port = chrome.extension.connect();
-port.onMessage.addListener(function(tabID) {
-    chrome.storage.local.get(['user_logged_in'], function(results){
-        if(results.user_logged_in !== undefined) {
-            setExtensionContent(tabID);
+port.onMessage.addListener(function(msg) {
+    var user = msg.user;
+    var tabID = msg.tab;
+    chrome.storage.local.get(user, function(results){
+        if(results[user] !== undefined) {
+            setExtensionContent(tabID, user);
         } else {
-            setLoginListener(tabID);
+            setLoginListener(tabID, user);
         }
     });
 });

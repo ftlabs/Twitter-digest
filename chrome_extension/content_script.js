@@ -15,15 +15,19 @@ chrome.runtime.onMessage.addListener((message) => {
 		let stream = document.querySelector('.stream-container >.stream >ol.stream-items');
 		if(stream.querySelector('.digest-stream') !== null) stream.querySelector('.digest-stream').remove();
 
-		for(let i in filter.collection) {
-			let tweet = document.querySelector('.stream-item[data-item-id="'+filter.collection[i]+'"]');
-			if(tweet !== null && filter.tweets[i] !== null) {
-				tweet.classList.add('hidden');
-				filter.tweets[i].digestScore = getDigestScore(tweet);
-				filter.tweets[i].hidden = false;
-			}
-			else {
-				filter.tweets[i].hidden = true;
+		for(let i = 0; i < filter.tweets.length; ++i) {
+			if(filter.tweets[i] !== null) {	
+				let tweet = document.querySelector('.stream-item[data-item-id="'+filter.tweets[i].id_str+'"]');
+				if(tweet !== null) {
+					tweet.classList.add('hidden');
+					if(!filter.tweets[i].digestScore) filter.tweets[i].digestScore = getDigestScore(tweet);
+					filter.tweets[i].hidden = false;
+				}
+				else {
+					filter.tweets[i].hidden = true;
+				}
+			} else {
+				filter.tweets.splice(i, 1);
 			}
 		}
 
@@ -248,7 +252,8 @@ function updateMaxID() {
 }
 
 function toggleExtension() {
-	chrome.runtime.sendMessage('enable_page_action', function () {});
+	var userID = JSON.parse(document.getElementById('init-data').value).userId;
+	chrome.runtime.sendMessage({'enable_page_action': userID}, function () {});
 }
 
 document.addEventListener('DOMContentLoaded', toggleExtension);
