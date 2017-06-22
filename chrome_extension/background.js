@@ -2,7 +2,7 @@ let lastCall = 0;
 let USER_ACCESS, USER_SECRET, currentUser;
 let saved_topic;
 window.requestDone = false;
-const serverPath = "http://ftlabs-twitter-digest.herokuapp.com";
+const serverPath = "https://ftlabs-twitter-digest.herokuapp.com";
 
 chrome.runtime.onMessage.addListener(function (message, sender, callback) {
     if (message['enable_page_action'] && sender.tab.active) {
