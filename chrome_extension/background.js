@@ -2,6 +2,7 @@ let lastCall = 0;
 let USER_ACCESS, USER_SECRET, currentUser;
 let saved_topic;
 window.requestDone = false;
+const serverPath = "http://ftlabs-twitter-digest.herokuapp.com";
 
 chrome.runtime.onMessage.addListener(function (message, sender, callback) {
     if (message['enable_page_action'] && sender.tab.active) {
@@ -168,7 +169,7 @@ function pollTweets(tid, action, param) {
 }
 
 function getPath(action, tid, tweet_id, callback) {
-    let path = "https://ftlabs-twitter-digest.herokuapp.com/tweets/user/"+USER_SECRET+"/"+USER_ACCESS;
+    let path = serverPath + "/tweets/user/"+USER_SECRET+"/"+USER_ACCESS;
     let topic, sinceID, maxID;
 
     chrome.storage.local.get(['digest_topic'], function(results){
