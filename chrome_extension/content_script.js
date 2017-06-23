@@ -8,7 +8,7 @@ const max_cache = 43200000; //12 hours
 chrome.runtime.onMessage.addListener((message) => {
 	if(message.message === 'sendfilter') {
 		filter = message.filter;
-
+		
 		updateSinceID();
 		updateMaxID();
 
@@ -158,8 +158,6 @@ function setObserver(target) {
 	  		if(mutation.type === 'childList') {
 	  			if(mutation.nextSibling === null) {
 	  				requestOldTweets();
-	  			} else {
-	  				updateDigestPosition(stream);
 	  			}
 	  		}
 	  	});
@@ -170,7 +168,12 @@ function setObserver(target) {
 	  		if(mutation.type === 'childList') {
 	  			let newTweets = document.querySelector('.js-new-tweets-bar');
 				if(newTweets !== null) {
-					newTweets.addEventListener('click', requestNewTweets);
+					newTweets.addEventListener('click', () => {
+						requestNewTweets(() => {
+							updateDigestPosition(stream);
+							updateSinceID();
+						});
+					});
 				}
 	  		}
 	  	});
@@ -180,9 +183,8 @@ function setObserver(target) {
 	newTweetsObserver.observe(streamParent, config);
 }
 
-function requestNewTweets(e) {
-	chrome.runtime.sendMessage({'load_new_tweets': sinceID}, updateSinceID);
-	e.target.removeEventListener('click', requestNewTweets);
+function requestNewTweets(callback) {
+	chrome.runtime.sendMessage({'load_new_tweets': sinceID}, callback);
 }
 
 function requestOldTweets() {
