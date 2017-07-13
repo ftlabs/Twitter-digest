@@ -3,29 +3,41 @@ const config = { attributes: true, childList: true, characterData: true };
 let maxID = 0;
 let sinceID = 0;
 let lastRequested = 0;
+const max_cache = 43200000; //12 hours
 
 chrome.runtime.onMessage.addListener((message) => {
 	if(message.message === 'sendfilter') {
 		filter = message.filter;
-		chrome.runtime.sendMessage({'set_cookie': filter}, function(){});
-
+		
 		updateSinceID();
 		updateMaxID();
 
 		let stream = document.querySelector('.stream-container >.stream >ol.stream-items');
 		if(stream.querySelector('.digest-stream') !== null) stream.querySelector('.digest-stream').remove();
 
-		for(let i in filter.collection) {
-			let tweet = document.querySelector('.stream-item[data-item-id="'+filter.collection[i]+'"]');
-			if(tweet !== null) {
-				tweet.classList.add('hidden');
-				filter.tweets[i].digestScore = getDigestScore(tweet);
-				filter.tweets[i].hidden = false;
-			}
-			else {
-				filter.tweets[i].hidden = true;
+		for(let i = 0; i < filter.tweets.length; ++i) {
+			if(filter.tweets[i] !== null) {
+				let isOld = tweetIsOld(filter.tweets[i]);
+				let tweet = document.querySelector('.stream-item[data-item-id="'+filter.tweets[i].id_str+'"]');
+
+				if(tweet !== null && !isOld) {
+					tweet.classList.add('hidden');
+					if(!filter.tweets[i].digestScore) filter.tweets[i].digestScore = getDigestScore(tweet);
+					filter.tweets[i].hidden = false;
+				}
+				else {
+					if(isOld) {
+						filter.tweets.splice(i, 1);
+					} else {
+						filter.tweets[i].hidden = true;	
+					}
+				}
+			} else {
+				filter.tweets.splice(i, 1);
 			}
 		}
+
+		chrome.runtime.sendMessage({'set_cookie': filter}, function(){});
 
 		lastRequested = filter.tweets[filter.tweets.length - 1].id || 0;
 
@@ -55,6 +67,8 @@ chrome.runtime.onMessage.addListener((message) => {
 		chrome.runtime.sendMessage('delete_cookie', function(){});
 	} else if(message.message === 'reloadWindow') {
 		location.reload();
+	} else if(message.message === 'topicNoResults') {
+		chrome.runtime.sendMessage({'set_cookie': message.filter}, function(){});
 	}
 });
 
@@ -144,8 +158,6 @@ function setObserver(target) {
 	  		if(mutation.type === 'childList') {
 	  			if(mutation.nextSibling === null) {
 	  				requestOldTweets();
-	  			} else {
-	  				updateDigestPosition(stream);
 	  			}
 	  		}
 	  	});
@@ -156,7 +168,12 @@ function setObserver(target) {
 	  		if(mutation.type === 'childList') {
 	  			let newTweets = document.querySelector('.js-new-tweets-bar');
 				if(newTweets !== null) {
-					newTweets.addEventListener('click', requestNewTweets);
+					newTweets.addEventListener('click', () => {
+						requestNewTweets(() => {
+							updateDigestPosition(stream);
+							updateSinceID();
+						});
+					});
 				}
 	  		}
 	  	});
@@ -166,9 +183,8 @@ function setObserver(target) {
 	newTweetsObserver.observe(streamParent, config);
 }
 
-function requestNewTweets(e) {
-	chrome.runtime.sendMessage({'load_new_tweets': sinceID}, updateSinceID);
-	e.target.removeEventListener('click', requestNewTweets);
+function requestNewTweets(callback) {
+	chrome.runtime.sendMessage({'load_new_tweets': sinceID}, callback);
 }
 
 function requestOldTweets() {
@@ -225,6 +241,12 @@ function sortVisibleTweets(tweet_array) {
 	return tweet_array;
 }
 
+function tweetIsOld(tweet) {
+	let time_diff = new Date().getTime() - new Date(tweet.created_at).getTime();
+
+	return time_diff > max_cache;
+}
+
 function getIndex(node){
 	if(node !== null) {	
 	    let i = 1;
@@ -246,7 +268,8 @@ function updateMaxID() {
 }
 
 function toggleExtension() {
-	chrome.runtime.sendMessage('enable_page_action', function () {});
+	var userID = JSON.parse(document.getElementById('init-data').value).userId;
+	chrome.runtime.sendMessage({'enable_page_action': userID}, function () {});
 }
 
 document.addEventListener('DOMContentLoaded', toggleExtension);

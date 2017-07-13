@@ -1,49 +1,60 @@
 let lastCall = 0;
-let USER_ACCESS, USER_SECRET;
+let USER_ACCESS, USER_SECRET, currentUser;
+let saved_topic;
 window.requestDone = false;
+const serverPath = "https://ftlabs-twitter-digest.herokuapp.com";
 
 chrome.runtime.onMessage.addListener(function (message, sender, callback) {
-    if (message === 'enable_page_action') {
+    if (message['enable_page_action'] && sender.tab.active) {
         let tid = sender.tab.id;
-        chrome.storage.local.get(['extension_enabled'], function(results){
-            if(results.extension_enabled === undefined) {
-                chrome.runtime.sendMessage({'set_state': 'enabled'}, function(){
+
+        currentUser = message['enable_page_action'];
+
+        chrome.storage.local.get(currentUser, function(results) {
+            if(results[currentUser] !== undefined) {
+                setCredentials(JSON.parse(results[currentUser]));
+            } else {
+                resetUser(tid);
+            }
+
+            chrome.storage.local.get(['extension_enabled'], function(results){
+                if(results.extension_enabled === undefined) {
+                    chrome.runtime.sendMessage({'set_state': 'enabled'}, function(){
+                        pollTweets(tid, 'connect');
+                    });
+                } else if(results.extension_enabled === 'enabled') {
                     pollTweets(tid, 'connect');
-                });
-            } else if(results.extension_enabled === 'enabled') {
-                pollTweets(tid, 'connect');
-            }
+                }
 
-            setExtensionIcon(tid, results.extension_enabled);
-        });
+                setExtensionIcon(tid, results.extension_enabled);
+            });
 
-        chrome.storage.local.get(['user_logged_in'], function(results) {
-            if(results.user_logged_in !== undefined) {
-                setCredentials(JSON.parse(results.user_logged_in));
-            }
+            chrome.extension.onConnect.addListener(function(port) {
+               port.postMessage({'user': currentUser, 'tab': tid});
+            });
+            
+            chrome.pageAction.show(tid);
         });
-
-        chrome.extension.onConnect.addListener(function(port) {
-           port.postMessage(tid);
-        });
-        
-        chrome.pageAction.show(tid);
 
     } else if(message['load_old_tweets']){
         pollTweets(sender.tab.id, 'load_old', message['load_old_tweets']);
     } else if(message['load_new_tweets']) {
         pollTweets(sender.tab.id, 'load_new', message['load_new_tweets']);
     } else if(message['set_cookie']) {
-    	chrome.storage.local.set({'tweet_selection': message['set_cookie']});
+        var selection = message['set_cookie'];
+        if(!selection.user) selection.user = currentUser;
+    	chrome.storage.local.set({'tweet_selection': selection});
     } else if(message === 'delete_cookie') {
     	chrome.storage.local.remove('tweet_selection');
         chrome.storage.local.remove('digest_topic');
+        saved_topic = '';
     } else if(message['set_state']) {
         setState(message['set_state'], message['tab']);
     } else if(message['set_topic']) {
+        saved_topic = message['set_topic'];
         chrome.storage.local.set({'digest_topic': message['set_topic']});
     } else if(message['request_login']) {
-        signInRequest(function(credentials) {
+        signInRequest(currentUser, function(credentials) {
             setCredentials(credentials);
             chrome.tabs.update(message['tab'], {selected: true});
             chrome.tabs.sendMessage(message['tab'], {message:'reloadWindow'}, function(){});
@@ -59,9 +70,10 @@ function setCredentials(credentials) {
 function resetUser(tid) {
     USER_ACCESS = null;
     USER_SECRET = null;
-    chrome.storage.local.remove('user_logged_in');
+    chrome.storage.local.remove(currentUser);
     chrome.storage.local.remove('tweet_selection');
     chrome.storage.local.remove('digest_topic');
+    saved_topic = '';
 
     setState('disabled', tid);
 
@@ -109,6 +121,7 @@ function pollTweets(tid, action, param) {
         if (xmlhttp.readyState == 4) {
             if(xmlhttp.status == 200) {
               fetchResult = JSON.parse(xmlhttp.responseText);
+
               if(fetchResult.error) {
                 resetUser(tid);
                 return;
@@ -119,7 +132,7 @@ function pollTweets(tid, action, param) {
                     if(fetchResult.tweets.length > 0) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:fetchResult}, function(){}); 
                     } else {
-                        setState('disabled', tid);
+                        chrome.tabs.sendMessage(tid, {message:'topicNoResults', result: fetchResult}, function(){});
                     }
                 } else {
                     combineTweets(tid, fetchResult, results.tweet_selection);
@@ -130,7 +143,12 @@ function pollTweets(tid, action, param) {
                     if(results.tweet_selection !== undefined) {
                         chrome.tabs.sendMessage(tid, {message:'sendfilter', filter:results.tweet_selection}, function(){}); 
                     } else {
-                      setState('disabled', tid);   
+                        var empty_results = {
+                            topic: saved_topic,
+                            collection: [],
+                            tweets: []
+                        }
+                        chrome.tabs.sendMessage(tid, {message:'topicNoResults', filter: empty_results}, function(){});
                     }
                 });
             }
@@ -151,12 +169,14 @@ function pollTweets(tid, action, param) {
 }
 
 function getPath(action, tid, tweet_id, callback) {
-    let path = "https://ftlabs-twitter-digest.herokuapp.com/tweets/user/"+USER_SECRET+"/"+USER_ACCESS;
+    let path = serverPath + "/tweets/user/"+USER_SECRET+"/"+USER_ACCESS;
     let topic, sinceID, maxID;
 
     chrome.storage.local.get(['digest_topic'], function(results){
         if(results.digest_topic !== undefined) {
-               topic = results.digest_topic;
+            topic = results.digest_topic;
+        } else {
+            topic = saved_topic;
         }
 
         path += '/topic/' + topic;
