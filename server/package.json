@@ -19,5 +19,8 @@
     "twitter": "^1.7.0",
     "twitter-stream-api": "^0.5.0",
     "twitter-stream-filters": "^0.1.2"
+  },
+  "engines" : {
+    "node" : "> 6.11.0 < 7.0.0" 
   }
 }
