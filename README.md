@@ -1,6 +1,9 @@
 # Twitter Digest
 Chrome extension for Twitter. It allows users to filter their timeline based on a chosen keyword.
 
+## Update
+The server-side of this extension is no longer available, to run your own application make sure to replace the `serverPath` in the extension. Similarly, the Twitter application has been deleted so a new one needs to be set up for your own use.
+
 ## How to install the extension
 Clone [this repository](https://github.com/ftlabs/Twitter-digest), then visit `chrome://extensions`.
 Check "Enable Developer mode".
